@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Navbar from "@/components/common/Navbar/Navbar";
 import RoiMetrics from "@/components/admin/RoiMetrics/RoiMetrics";
 import UnmappedAddressAlertBox from "@/components/admin/UnmappedAddressAlertBox/UnmappedAddressAlertBox";
 import ShiftPicker, { type PickableShift } from "@/components/admin/ShiftPicker/ShiftPicker";
@@ -10,6 +11,11 @@ import type { DashboardData } from "@/lib/roster/getDashboardData";
 import styles from "./page.module.css";
 
 type LoadStatus = "loading" | "ready" | "error";
+
+const ADMIN_NAV_LINKS = [
+  { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/billing", label: "Billing" },
+];
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -42,6 +48,7 @@ export default function AdminDashboardPage() {
   if (status === "loading") {
     return (
       <div className={styles.page}>
+        <Navbar links={ADMIN_NAV_LINKS} />
         <p className={styles.message}>Loading dashboard…</p>
       </div>
     );
@@ -50,6 +57,7 @@ export default function AdminDashboardPage() {
   if (status === "error" || !data) {
     return (
       <div className={styles.page}>
+        <Navbar links={ADMIN_NAV_LINKS} />
         <p className={styles.messageError}>
           Couldn&apos;t load the dashboard. Please try again.
         </p>
@@ -63,6 +71,8 @@ export default function AdminDashboardPage() {
 
   return (
     <div className={styles.page}>
+      <Navbar links={ADMIN_NAV_LINKS} />
+
       <header className={styles.header}>
         <span className={styles.badge}>Admin</span>
         <h1 className={styles.heading}>Today&apos;s Dashboard</h1>

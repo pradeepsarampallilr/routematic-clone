@@ -1,0 +1,30 @@
+.nav {
+  display: inline-flex;
+  padding: var(--space-1);
+  gap: var(--space-1);
+  background: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  align-self: flex-start;
+}
+
+.link {
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  color: var(--color-gray-600);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--color-gray-900);
+}
+
+.link[data-active="true"] {
+  background: #ffffff;
+  color: var(--color-primary);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08);
+}
