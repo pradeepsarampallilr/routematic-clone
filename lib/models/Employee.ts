@@ -20,7 +20,7 @@ const EmployeeSchema = new Schema<IEmployee>({
   phone: { type: String, required: true },
   address: { type: String, required: true },
   location: {
-    type: { lat: Number, lng: Number },
+    type: { lat: Number, lng: Number, _id: false },
     required: false,
     default: undefined,
   },
