@@ -1,11 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, Popup } from "react-leaflet";
 import L from "leaflet";
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import styles from "./RouteMap.module.css";
 
@@ -17,25 +13,23 @@ interface RouteMapProps {
   pickupLocation: { lat: number; lng: number } | null;
 }
 
-let defaultIconConfigured = false;
-
-function ensureDefaultIcon() {
-  if (defaultIconConfigured) return;
-  // Bundlers break Leaflet's default marker icon URLs — reassign them explicitly.
-  delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x.src,
-    iconUrl: markerIcon.src,
-    shadowUrl: markerShadow.src,
-  });
-  defaultIconConfigured = true;
-}
+// Importing leaflet's marker images from node_modules doesn't survive Next's
+// bundler pipeline (the .png import resolves without a usable .src), leaving
+// Leaflet's default icon unconfigured. Point it at the CDN copy instead —
+// runs once at module evaluation, on the client only (this module is loaded
+// via next/dynamic with ssr:false), before <Marker> constructs an icon.
+const DEFAULT_ICON = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+L.Marker.prototype.options.icon = DEFAULT_ICON;
 
 export default function RouteMap({ geoJsonRoute, pickupLocation }: RouteMapProps) {
-  useEffect(() => {
-    ensureDefaultIcon();
-  }, []);
-
   const positions: [number, number][] = geoJsonRoute.coordinates.map(([lng, lat]) => [
     lat,
     lng,
