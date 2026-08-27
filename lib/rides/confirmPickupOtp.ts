@@ -3,6 +3,24 @@ import dbConnect from "@/lib/db/connect";
 import Roster, { type IRosterStop } from "@/lib/models/Roster";
 import Ride from "@/lib/models/Ride";
 
+type ConfirmRole = "employee" | "driver";
+
+type StopStatus = "pending" | "confirmed" | "picked_up";
+
+// Ordinal progress of a stop — a confirmation should never move it backwards
+// (e.g. a driver re-confirming after the employee already did shouldn't matter,
+// and vice versa).
+const STATUS_RANK: Record<StopStatus, number> = {
+  pending: 0,
+  confirmed: 1,
+  picked_up: 2,
+};
+
+const TARGET_STATUS: Record<ConfirmRole, StopStatus> = {
+  employee: "confirmed",
+  driver: "picked_up",
+};
+
 type ConfirmResult =
   | { ok: true; rideId: string; status: "in_progress" | "completed" }
   | { ok: false; error: string };
@@ -10,7 +28,8 @@ type ConfirmResult =
 export async function confirmPickupOtp(
   rideKey: string,
   employeeId: string,
-  otp: string
+  otp: string,
+  role: ConfirmRole
 ): Promise<ConfirmResult> {
   await dbConnect();
 
@@ -37,8 +56,11 @@ export async function confirmPickupOtp(
     return { ok: false, error: "Incorrect OTP" };
   }
 
-  stop.status = "confirmed";
-  await roster.save();
+  const targetStatus = TARGET_STATUS[role];
+  if (STATUS_RANK[targetStatus] > STATUS_RANK[stop.status as StopStatus]) {
+    stop.status = targetStatus;
+    await roster.save();
+  }
 
   let ride = await Ride.findOne({ rosterId: roster._id, routeIndex });
   if (!ride) {

@@ -36,7 +36,7 @@ export default function ConfirmPickupModal({
       const res = await fetch(`/api/rides/${rideKey}/otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId, otp: otpInput }),
+        body: JSON.stringify({ employeeId, otp: otpInput, role: "employee" }),
       });
       const data = await res.json();
       if (!res.ok) {
